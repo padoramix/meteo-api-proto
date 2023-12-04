@@ -4,8 +4,104 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ma météo</title>
+  <style type="text/css">
+    .results{
+      display: none;
+      margin: auto;
+      text-align: center;
+      background-color: lightgray;
+    }
+
+    .spinner{
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  
+  <h1>Ma météo</h1>
+
+  <div id="spinner"></div>
+  <div class="results">
+    <h2>Température à Toulouse le <span id="date-meteo"></span></h2>
+    <span id="temp-val"></span>
+  </div>
+  <!-- Load jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+          integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+          crossorigin="anonymous">
+  </script>
+  <script type="text/javascript" src="http://fgnass.github.com/spin.js/spin.js"></script>
+  <script>
+    // TODO (next steps)
+    // 1. Ajout d'un spinner avec mise en place d'un petit délai (5s avec setTimeout)
+    // 2. Gestion de l'affichage des températures prévisionnelles sur plusieurs jours
+
+
+    // Init jquery use in the page
+    $(function() {
+      // ----------------------------------------------
+      // Constante avec la clé d'API
+      const API_KEY = "6ac47a29fd103b68212a35fe55dcb6ba";
+      const KELVIN_CONSTANT = 273.15;
+
+
+      // ----------------------------------------------
+      // MAIN JS CODE
+      // Mettre en place spinner ici à la place des valeurs dans le HTML
+
+      // APPEL Ajax vers API weather 
+      $.ajax({
+        // Target URL
+        url: "http://api.openweathermap.org/data/2.5/forecast?id=524901",
+        // Les données que l'on veut transmettre à l'API
+        data: {
+          appid: API_KEY,
+          q: "Toulouse, France"
+        },
+        // Type of request (here we want to get some results)
+        type: 'GET',
+        // The type of data we expect back
+        dataType : "json",
+        success: function (_data) {
+          setTimeout(() => {
+            // La fonction qui sera appelée en cas de succès
+            console.log('Réponse réussie :', _data);
+            // Verif fonction de conversion
+            console.log("Température en °C à Toulouse : ", convertFromKelvinToCelsius(_data.list[0].main.temp));
+            
+            // TODO : enlever le spinner pour display les résultats
+
+            // Fais quelque chose avec les données retournées
+            // Set la date dans la bonne section HTML :
+            $(".results #date-meteo").text(cleanDateDisplay(_data.list[0].dt_txt));
+            $(".results #temp-val").text(convertFromKelvinToCelsius(_data.list[0].main.temp));
+          }, 5000);
+        },
+        error: function (error) {
+          // La fonction qui sera appelée en cas d'erreur
+          console.error('Erreur :', error);
+        }
+      });
+
+
+      // ----------------------------------------------
+      // Utils
+      /*
+        Function comment
+      */
+      function convertFromKelvinToCelsius( _tempKelvin ){
+        return Math.round(_tempKelvin - KELVIN_CONSTANT)+ "°C";
+      }
+
+      /*
+        Function comment
+      */
+      function cleanDateDisplay( _date ){
+        let myDate = new Date(_date);
+        const options = { year: 'numeric', month: 'long', day: 'numeric'};
+        return myDate.toLocaleDateString('fr-FR', options);
+      }
+    });
+  </script>
 </body>
 </html>
